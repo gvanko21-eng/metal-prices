@@ -66,6 +66,7 @@
         .refresh-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.7rem;transition:0.2s;white-space:nowrap;}
         .refresh-btn:hover{background:rgba(255,255,255,0.14);}
         .countdown-text{font-family:monospace;font-size:0.7rem;color:#888;}
+        .data-source{font-size:0.6rem;color:#5a5d72;text-align:center;margin-top:10px;border-top:1px dashed rgba(255,255,255,0.08);padding-top:8px;width:100%;}
         @media (max-width:760px){.panel{flex:1 1 100%;min-width:0;max-width:100%;padding:16px 12px 14px;}.price-value{font-size:1.2rem;}.dc-price{font-size:1.5rem;}.gram-price-item{font-size:0.7rem;}.gram-price-item span{font-size:0.75rem;}}
     </style>
 </head>
@@ -100,26 +101,28 @@
             <span class="countdown-text" id="intlCountdown"></span>
             <button class="refresh-btn" onclick="fetchAllData(true)">🔄 刷新</button>
         </div>
+        <div class="data-source">数据来源：国际现货价格由 Coinbase 提供，汇率由 exchangerate-api 提供</div>
     </div>
     <div class="panel right-panel">
         <div class="panel-header"><div class="panel-icon">🏭</div><div><div class="panel-title">国内批发参考价</div><div class="panel-subtitle">人民币/克</div></div></div>
         <div class="domestic-price-row">
-            <div class="domestic-card gold-domestic"><div class="dc-label">🥇 黄金批发克价</div><div class="dc-price" id="domesticGoldPrice">--</div><div class="dc-unit">人民币/克</div><div class="dc-note">金价+3.5溢价</div></div>
-            <div class="domestic-card silver-domestic"><div class="dc-label">🥈 白银批发克价</div><div class="dc-price" id="domesticSilverPrice">--</div><div class="dc-unit">人民币/克</div><div class="dc-note">银价+0.2溢价</div></div>
+            <div class="domestic-card gold-domestic"><div class="dc-label">🥇 黄金批发克价</div><div class="dc-price" id="domesticGoldPrice">--</div><div class="dc-unit">人民币/克</div><div class="dc-note">国际金价 + 5.0 溢价</div></div>
+            <div class="domestic-card silver-domestic"><div class="dc-label">🥈 白银批发克价</div><div class="dc-price" id="domesticSilverPrice">--</div><div class="dc-unit">人民币/克</div><div class="dc-note">国际银价 + 0.5 溢价</div></div>
         </div>
         <div class="status-bar" style="margin-top:18px;">
             <span><span class="status-dot loading-dot" id="domesticStatusDot"></span><span id="domesticStatusText">加载中...</span></span>
             <span class="countdown-text" id="domesticCountdown"></span>
             <button class="refresh-btn" onclick="fetchAllData(true)">🔄 刷新</button>
         </div>
+        <div class="data-source">计算方式：国际现货人民币克价 + 固定溢价</div>
     </div>
 </div>
 <script>
     (function() {
         const OZ_TO_GRAM = 31.1034768;
         const REFRESH_INTERVAL = 60;
-        const GOLD_PREMIUM = 5;
-        const SILVER_PREMIUM = 0.5;
+        const GOLD_PREMIUM = 5.0;   // 黄金溢价 5 元/克
+        const SILVER_PREMIUM = 0.5; // 白银溢价 0.5 元/克
 
         const $ = id => document.getElementById(id);
         const goldUsdOz = $('goldUsdOz'), goldCnyOz = $('goldCnyOz'), goldUsdGram = $('goldUsdGram'), goldCnyGram = $('goldCnyGram');
@@ -141,7 +144,7 @@
             if(key && val!=null && !isNaN(val)) previousPrices[key]=val;
         }
 
-        // 兼容版带超时的fetch
+        // 兼容移动端的超时fetch
         function fetchWithTimeout(url, timeout = 8000) {
             return new Promise((resolve, reject) => {
                 const controller = new AbortController();
