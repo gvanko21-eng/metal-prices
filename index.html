@@ -3,130 +3,460 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
-    <title>贵金属价格实时监控 · 金&银</title>
+    <title>贵金属价格 · 金&银</title>
     <style>
         :root {
-            --gold: #c8960c;
-            --silver: #8a8a8a;
-            --bg: #0f1119;
-            --card-bg: #1a1d2b;
-            --text: #e8e8ec;
-            --text-secondary: #a0a4b8;
-            --border: #2a2d3d;
-            --radius: 18px;
-            --shadow: 0 8px 32px rgba(0,0,0,0.35);
+            --bg: #f5f5f7;
+            --card-bg: #ffffff;
+            --text: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --border: #d2d2d7;
+            --accent: #0071e3;
+            --gold: #d4a017;
+            --gold-light: #f5e6c8;
+            --silver: #86868b;
+            --silver-light: #e8e8ed;
+            --radius: 20px;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.04);
+            --transition: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{
-            font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
-            background:var(--bg); background-image:radial-gradient(ellipse at 20% 30%,rgba(200,150,12,0.04) 0%,transparent 60%),radial-gradient(ellipse at 75% 60%,rgba(180,180,180,0.03) 0%,transparent 60%);
-            color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
         }
-        .main-container{display:flex;gap:20px;width:100%;max-width:1300px;min-height:600px;flex-wrap:wrap;justify-content:center;}
-        .panel{flex:1 1 460px;min-width:340px;max-width:620px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;position:relative;overflow:hidden;}
-        .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-        .left-panel::before{background:linear-gradient(90deg,var(--gold),var(--silver),var(--gold));}
-        .right-panel::before{background:linear-gradient(90deg,#c8960c,#e67e22,#c8960c);}
-        .panel-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);}
-        .panel-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:rgba(200,150,12,0.15);}
-        .panel-title{font-size:1.1rem;font-weight:700;letter-spacing:0.3px;}
-        .panel-subtitle{font-size:0.75rem;color:var(--text-secondary);margin-top:2px;}
-        .metal-section{background:#1d1f2e;border-radius:10px;padding:16px 14px;margin-bottom:14px;border-left:3px solid transparent;}
-        .gold-section{border-left-color:var(--gold);}
-        .silver-section{border-left-color:var(--silver);}
-        .metal-label{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-        .metal-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
-        .gold-dot{background:var(--gold);box-shadow:0 0 12px var(--gold);}
-        .silver-dot{background:var(--silver);box-shadow:0 0 12px var(--silver);}
-        .metal-name{font-weight:700;font-size:0.95rem;}
-        .metal-symbol{font-size:0.7rem;color:var(--text-secondary);background:#252840;padding:3px 8px;border-radius:20px;}
-        .price-main-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;}
-        .price-block{flex:1 1 130px;min-width:110px;background:rgba(255,255,255,0.02);border-radius:8px;padding:10px 10px;text-align:center;}
-        .unit-label{font-size:0.7rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
-        .price-value{font-size:1.4rem;font-weight:700;color:#fff;transition:color 0.4s;}
-        .price-flash{animation:flashHighlight 0.8s ease-out;}
-        @keyframes flashHighlight{0%{color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.7);}100%{color:#fff;text-shadow:none;}}
-        .gram-price-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;padding-top:8px;border-top:1px dashed rgba(255,255,255,0.08);}
-        .gram-price-item{flex:1 1 90px;font-size:0.75rem;color:var(--text-secondary);text-align:center;}
-        .gram-price-item span{color:#d0d0d8;font-weight:600;font-size:0.85rem;}
-        .domestic-price-row{display:flex;flex-wrap:wrap;gap:14px;}
-        .domestic-card{flex:1 1 160px;min-width:140px;background:rgba(255,255,255,0.02);border-radius:12px;padding:16px 14px;text-align:center;border:1px solid transparent;}
-        .gold-domestic{border-bottom:3px solid var(--gold);}
-        .silver-domestic{border-bottom:3px solid var(--silver);}
-        .dc-label{font-size:0.75rem;color:var(--text-secondary);margin-bottom:6px;}
-        .dc-price{font-size:1.8rem;font-weight:700;color:#fff;line-height:1.2;}
-        .dc-unit{font-size:0.7rem;color:var(--text-secondary);margin-top:4px;}
-        .dc-note{font-size:0.65rem;color:#6a6d80;margin-top:6px;}
-        .status-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:12px;border-top:1px solid var(--border);font-size:0.7rem;color:var(--text-secondary);}
-        .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
-        .status-dot.online{background:#2ecc71;box-shadow:0 0 8px #2ecc71;animation:pulse 2s infinite;}
-        .status-dot.offline{background:#e74c3c;box-shadow:0 0 8px #e74c3c;}
-        .status-dot.loading-dot{background:#f39c12;box-shadow:0 0 8px #f39c12;animation:pulse 1s infinite;}
-        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-        .refresh-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.7rem;transition:0.2s;white-space:nowrap;}
-        .refresh-btn:hover{background:rgba(255,255,255,0.14);}
-        .countdown-text{font-family:monospace;font-size:0.7rem;color:#888;}
-        .data-source{font-size:0.6rem;color:#5a5d72;text-align:center;margin-top:10px;border-top:1px dashed rgba(255,255,255,0.08);padding-top:8px;width:100%;}
-        @media (max-width:760px){.panel{flex:1 1 100%;min-width:0;max-width:100%;padding:16px 12px 14px;}.price-value{font-size:1.2rem;}.dc-price{font-size:1.5rem;}.gram-price-item{font-size:0.7rem;}.gram-price-item span{font-size:0.75rem;}}
+        .main-container {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            max-width: 1280px;
+            min-height: 600px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .panel {
+            flex: 1 1 460px;
+            min-width: 340px;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 32px 28px 28px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        .panel:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e5e5ea;
+        }
+        .panel-icon {
+            width: 44px; height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            background: #f2f2f7;
+        }
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .panel-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 3px;
+            font-weight: 400;
+        }
+        .metal-section {
+            background: #f9f9fb;
+            border-radius: 14px;
+            padding: 20px 18px;
+            margin-bottom: 16px;
+            border-left: 4px solid transparent;
+            transition: var(--transition);
+        }
+        .gold-section { border-left-color: var(--gold); }
+        .silver-section { border-left-color: var(--silver); }
+        .metal-section:hover { background: #f2f2f7; }
+        .metal-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .metal-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px currentColor;
+        }
+        .gold-dot { background: var(--gold); color: var(--gold); }
+        .silver-dot { background: var(--silver); color: var(--silver); }
+        .metal-name { font-weight: 600; font-size: 1rem; }
+        .metal-symbol {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: #e5e5ea;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .price-main-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+        .price-block {
+            flex: 1 1 140px;
+            min-width: 120px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 14px 14px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+            border: 1px solid #efeff1;
+        }
+        .unit-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .price-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+        .price-flash {
+            animation: flashHighlight 0.8s ease-out;
+        }
+        @keyframes flashHighlight {
+            0% { color: var(--accent); transform: scale(1.02); }
+            100% { color: var(--text); transform: scale(1); }
+        }
+        .gram-price-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 1px dashed #e0e0e5;
+        }
+        .gram-price-item {
+            flex: 1 1 100px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        .gram-price-item span {
+            color: #1d1d1f;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .domestic-price-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .domestic-card {
+            flex: 1 1 170px;
+            min-width: 150px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            border: 1px solid #efeff1;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+            transition: var(--transition);
+        }
+        .domestic-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .gold-domestic { border-bottom: 4px solid var(--gold); }
+        .silver-domestic { border-bottom: 4px solid var(--silver); }
+        .dc-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .dc-price {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        .dc-unit {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+        .dc-note {
+            font-size: 0.7rem;
+            color: #98989d;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #e5e5ea;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .status-dot.online {
+            background: #34c759;
+            box-shadow: 0 0 6px rgba(52, 199, 89, 0.4);
+        }
+        .status-dot.offline {
+            background: #ff3b30;
+            box-shadow: 0 0 6px rgba(255, 59, 48, 0.3);
+        }
+        .status-dot.loading-dot {
+            background: #ff9f0a;
+            box-shadow: 0 0 6px rgba(255, 159, 10, 0.4);
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .refresh-btn {
+            background: #f2f2f7;
+            border: 1px solid #d2d2d7;
+            color: #1d1d1f;
+            padding: 8px 18px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: var(--transition);
+            white-space: nowrap;
+            backdrop-filter: blur(10px);
+        }
+        .refresh-btn:hover {
+            background: #e5e5ea;
+            border-color: #c7c7cc;
+        }
+        .refresh-btn:active {
+            transform: scale(0.96);
+            background: #dcdce0;
+        }
+        .countdown-text {
+            font-variant-numeric: tabular-nums;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.75rem;
+            color: #98989d;
+        }
+        .data-source {
+            font-size: 0.7rem;
+            color: #98989d;
+            text-align: center;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #e0e0e5;
+            width: 100%;
+        }
+        @media (max-width: 800px) {
+            .panel {
+                padding: 20px 18px 18px;
+                border-radius: 18px;
+            }
+            .price-value {
+                font-size: 1.3rem;
+            }
+            .dc-price {
+                font-size: 1.6rem;
+            }
+            .gram-price-item {
+                font-size: 0.7rem;
+            }
+            .gram-price-item span {
+                font-size: 0.8rem;
+            }
+            body {
+                padding: 12px;
+            }
+        }
+        @media (max-width: 400px) {
+            .panel {
+                min-width: 0;
+                padding: 16px 12px 14px;
+            }
+            .price-block {
+                padding: 10px 8px;
+                min-width: 90px;
+            }
+            .price-value {
+                font-size: 1.1rem;
+            }
+            .dc-price {
+                font-size: 1.3rem;
+            }
+            .refresh-btn {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="main-container">
+    <!-- 左侧：国际报价 -->
     <div class="panel left-panel">
-        <div class="panel-header"><div class="panel-icon">🌍</div><div><div class="panel-title">国际实时报价</div><div class="panel-subtitle">International Spot</div></div></div>
+        <div class="panel-header">
+            <div class="panel-icon">🌍</div>
+            <div>
+                <div class="panel-title">国际实时报价</div>
+                <div class="panel-subtitle">International Spot</div>
+            </div>
+        </div>
+
+        <!-- 黄金 -->
         <div class="metal-section gold-section">
-            <div class="metal-label"><span class="metal-dot gold-dot"></span><span class="metal-name">黄金 Gold</span><span class="metal-symbol">XAU</span></div>
+            <div class="metal-label">
+                <span class="metal-dot gold-dot"></span>
+                <span class="metal-name">黄金 Gold</span>
+                <span class="metal-symbol">XAU</span>
+            </div>
             <div class="price-main-row">
-                <div class="price-block"><div class="unit-label">💵 美元/盎司</div><div class="price-value" id="goldUsdOz">--</div></div>
-                <div class="price-block"><div class="unit-label">💴 人民币/盎司</div><div class="price-value" id="goldCnyOz">--</div></div>
+                <div class="price-block">
+                    <div class="unit-label">💵 美元/盎司</div>
+                    <div class="price-value" id="goldUsdOz">--</div>
+                </div>
+                <div class="price-block">
+                    <div class="unit-label">💴 人民币/盎司</div>
+                    <div class="price-value" id="goldCnyOz">--</div>
+                </div>
             </div>
             <div class="gram-price-row">
                 <div class="gram-price-item">美元/克 <span id="goldUsdGram">--</span></div>
                 <div class="gram-price-item">人民币/克 <span id="goldCnyGram">--</span></div>
             </div>
         </div>
+
+        <!-- 白银 -->
         <div class="metal-section silver-section">
-            <div class="metal-label"><span class="metal-dot silver-dot"></span><span class="metal-name">白银 Silver</span><span class="metal-symbol">XAG</span></div>
+            <div class="metal-label">
+                <span class="metal-dot silver-dot"></span>
+                <span class="metal-name">白银 Silver</span>
+                <span class="metal-symbol">XAG</span>
+            </div>
             <div class="price-main-row">
-                <div class="price-block"><div class="unit-label">💵 美元/盎司</div><div class="price-value" id="silverUsdOz">--</div></div>
-                <div class="price-block"><div class="unit-label">💴 人民币/盎司</div><div class="price-value" id="silverCnyOz">--</div></div>
+                <div class="price-block">
+                    <div class="unit-label">💵 美元/盎司</div>
+                    <div class="price-value" id="silverUsdOz">--</div>
+                </div>
+                <div class="price-block">
+                    <div class="unit-label">💴 人民币/盎司</div>
+                    <div class="price-value" id="silverCnyOz">--</div>
+                </div>
             </div>
             <div class="gram-price-row">
                 <div class="gram-price-item">美元/克 <span id="silverUsdGram">--</span></div>
                 <div class="gram-price-item">人民币/克 <span id="silverCnyGram">--</span></div>
             </div>
         </div>
+
         <div class="status-bar">
-            <span><span class="status-dot loading-dot" id="intlStatusDot"></span><span id="intlStatusText">加载中...</span></span>
+            <span>
+                <span class="status-dot loading-dot" id="intlStatusDot"></span>
+                <span id="intlStatusText">加载中...</span>
+            </span>
             <span class="countdown-text" id="intlCountdown"></span>
             <button class="refresh-btn" onclick="fetchAllData(true)">🔄 刷新</button>
         </div>
-        <div class="data-source">数据来源：国际现货价格由 Coinbase 提供，汇率由 exchangerate-api 提供</div>
+        <div class="data-source">数据：Coinbase / Metals.live ｜ 汇率：exchangerate-api</div>
     </div>
+
+    <!-- 右侧：国内批发价 -->
     <div class="panel right-panel">
-        <div class="panel-header"><div class="panel-icon">🏭</div><div><div class="panel-title">国内批发参考价</div><div class="panel-subtitle">人民币/克</div></div></div>
-        <div class="domestic-price-row">
-            <div class="domestic-card gold-domestic"><div class="dc-label">🥇 黄金批发克价</div><div class="dc-price" id="domesticGoldPrice">--</div><div class="dc-unit">人民币/克</div><div class="dc-note">国际金价 + 5.0 溢价</div></div>
-            <div class="domestic-card silver-domestic"><div class="dc-label">🥈 白银批发克价</div><div class="dc-price" id="domesticSilverPrice">--</div><div class="dc-unit">人民币/克</div><div class="dc-note">国际银价 + 0.5 溢价</div></div>
+        <div class="panel-header">
+            <div class="panel-icon">🏭</div>
+            <div>
+                <div class="panel-title">国内批发参考价</div>
+                <div class="panel-subtitle">人民币/克</div>
+            </div>
         </div>
-        <div class="status-bar" style="margin-top:18px;">
-            <span><span class="status-dot loading-dot" id="domesticStatusDot"></span><span id="domesticStatusText">加载中...</span></span>
+
+        <div class="domestic-price-row">
+            <div class="domestic-card gold-domestic">
+                <div class="dc-label">🥇 黄金批发克价</div>
+                <div class="dc-price" id="domesticGoldPrice">--</div>
+                <div class="dc-unit">人民币 / 克</div>
+                <div class="dc-note">国际金价 + 5.0 溢价</div>
+            </div>
+            <div class="domestic-card silver-domestic">
+                <div class="dc-label">🥈 白银批发克价</div>
+                <div class="dc-price" id="domesticSilverPrice">--</div>
+                <div class="dc-unit">人民币 / 克</div>
+                <div class="dc-note">国际银价 + 0.5 溢价</div>
+            </div>
+        </div>
+
+        <div class="status-bar" style="margin-top: 20px;">
+            <span>
+                <span class="status-dot loading-dot" id="domesticStatusDot"></span>
+                <span id="domesticStatusText">加载中...</span>
+            </span>
             <span class="countdown-text" id="domesticCountdown"></span>
             <button class="refresh-btn" onclick="fetchAllData(true)">🔄 刷新</button>
         </div>
-        <div class="data-source">计算方式：国际现货人民币克价 + 固定溢价</div>
+        <div class="data-source">国际现货人民币克价 + 固定溢价</div>
     </div>
 </div>
+
 <script>
     (function() {
         const OZ_TO_GRAM = 31.1034768;
         const REFRESH_INTERVAL = 60;
-        const GOLD_PREMIUM = 5.0;   // 黄金溢价 5 元/克
-        const SILVER_PREMIUM = 0.5; // 白银溢价 0.5 元/克
+        const GOLD_PREMIUM = 5.0;
+        const SILVER_PREMIUM = 0.5;
+        const TIMEOUT_MS = 12000;
 
         const $ = id => document.getElementById(id);
-        const goldUsdOz = $('goldUsdOz'), goldCnyOz = $('goldCnyOz'), goldUsdGram = $('goldUsdGram'), goldCnyGram = $('goldCnyGram');
-        const silverUsdOz = $('silverUsdOz'), silverCnyOz = $('silverCnyOz'), silverUsdGram = $('silverUsdGram'), silverCnyGram = $('silverCnyGram');
+
+        // DOM elements
+        const goldUsdOz = $('goldUsdOz'), goldCnyOz = $('goldCnyOz'),
+              goldUsdGram = $('goldUsdGram'), goldCnyGram = $('goldCnyGram');
+        const silverUsdOz = $('silverUsdOz'), silverCnyOz = $('silverCnyOz'),
+              silverUsdGram = $('silverUsdGram'), silverCnyGram = $('silverCnyGram');
         const domesticGoldPrice = $('domesticGoldPrice'), domesticSilverPrice = $('domesticSilverPrice');
         const intlStatusDot = $('intlStatusDot'), intlStatusText = $('intlStatusText'), intlCountdown = $('intlCountdown');
         const domesticStatusDot = $('domesticStatusDot'), domesticStatusText = $('domesticStatusText'), domesticCountdown = $('domesticCountdown');
@@ -134,18 +464,32 @@
         let exchangeRate = null, countdown = REFRESH_INTERVAL, isFetching = false;
         let previousPrices = { gold: null, silver: null, domGold: null, domSilver: null };
 
-        function formatMoney(num, d=2) { return (num==null||isNaN(num)) ? '--' : Number(num).toFixed(d); }
-        function flash(el){ if(!el)return; el.classList.remove('price-flash'); void el.offsetWidth; el.classList.add('price-flash'); }
-        function updatePrice(el, val, fmt, key){
-            if(!el)return;
-            const str = fmt(val);
-            if(el.textContent!==str && el.textContent!=='--' && previousPrices[key]!=null) flash(el);
-            el.textContent = str;
-            if(key && val!=null && !isNaN(val)) previousPrices[key]=val;
+        function formatMoney(num, decimals = 2) {
+            if (num == null || isNaN(num)) return '--';
+            return Number(num).toFixed(decimals);
         }
 
-        // 兼容移动端的超时fetch
-        function fetchWithTimeout(url, timeout = 8000) {
+        function flash(el) {
+            if (!el) return;
+            el.classList.remove('price-flash');
+            void el.offsetWidth;
+            el.classList.add('price-flash');
+        }
+
+        function updatePrice(el, newVal, formatFn, prevKey) {
+            if (!el) return;
+            const formatted = formatFn(newVal);
+            if (el.textContent !== formatted && el.textContent !== '--' && previousPrices[prevKey] != null) {
+                flash(el);
+            }
+            el.textContent = formatted;
+            if (prevKey && newVal != null && !isNaN(newVal)) {
+                previousPrices[prevKey] = newVal;
+            }
+        }
+
+        // 带超时的fetch
+        function fetchWithTimeout(url, timeout = TIMEOUT_MS) {
             return new Promise((resolve, reject) => {
                 const controller = new AbortController();
                 const timer = setTimeout(() => {
@@ -164,80 +508,129 @@
             });
         }
 
-        async function fetchExchangeRate(){
-            try{
-                const resp = await fetchWithTimeout('https://api.exchangerate-api.com/v4/latest/USD', 6000);
-                if(!resp.ok) throw new Error('汇率错误');
+        // 获取汇率
+        async function fetchExchangeRate() {
+            try {
+                const resp = await fetchWithTimeout('https://api.exchangerate-api.com/v4/latest/USD', 8000);
+                if (!resp.ok) throw new Error('状态' + resp.status);
                 const data = await resp.json();
-                if(data?.rates?.CNY) exchangeRate = data.rates.CNY;
-            }catch(e){ console.warn('汇率失败，用7.25'); if(!exchangeRate) exchangeRate=7.25; }
+                if (data?.rates?.CNY) {
+                    exchangeRate = data.rates.CNY;
+                    console.log('汇率更新:', exchangeRate);
+                }
+            } catch (e) {
+                console.warn('汇率获取失败，使用备用值');
+                if (!exchangeRate) exchangeRate = 7.25;
+            }
             return exchangeRate;
         }
 
-        async function fetchMetalPrice(metal){
-            const symbol = metal==='gold' ? 'XAU' : 'XAG';
-            try{
-                const resp = await fetchWithTimeout(`https://api.coinbase.com/v2/prices/${symbol}-USD/spot`, 8000);
-                if(!resp.ok) throw new Error('状态'+resp.status);
+        // 金属价格：优先Coinbase，失败后尝试Metals.live
+        async function fetchMetalPrice(metal) {
+            const coinSymbol = metal === 'gold' ? 'XAU' : 'XAG';
+            // 尝试 Coinbase
+            try {
+                const resp = await fetchWithTimeout(`https://api.coinbase.com/v2/prices/${coinSymbol}-USD/spot`, TIMEOUT_MS);
+                if (!resp.ok) throw new Error('Coinbase状态' + resp.status);
                 const data = await resp.json();
-                if(data?.data?.amount) return parseFloat(data.data.amount);
-                throw new Error('格式异常');
-            }catch(e){
-                console.warn(metal+' Coinbase获取失败:', e.message);
-                return null;
+                if (data?.data?.amount) return parseFloat(data.data.amount);
+            } catch (e) {
+                console.warn(metal + ' Coinbase失败，尝试Metals.live');
             }
+            // 备用 Metals.live
+            try {
+                const metalName = metal === 'gold' ? 'gold' : 'silver';
+                const resp = await fetchWithTimeout(`https://api.metals.live/v1/spot/${metalName}`, TIMEOUT_MS);
+                if (!resp.ok) throw new Error('Metals状态' + resp.status);
+                const data = await resp.json();
+                if (Array.isArray(data) && data.length && typeof data[0].price === 'number') {
+                    return data[0].price;
+                }
+                if (data && typeof data.price === 'number') {
+                    return data.price;
+                }
+            } catch (e) {
+                console.warn(metal + ' Metals.live也失败');
+            }
+            return null;
         }
 
-        function updateUI(metal, priceUsdOz, rate){
+        function updateUI(metal, priceUsdOz, rate) {
             const priceCnyOz = priceUsdOz * rate;
             const priceUsdGram = priceUsdOz / OZ_TO_GRAM;
             const priceCnyGram = priceCnyOz / OZ_TO_GRAM;
-            if(metal==='gold'){
-                updatePrice(goldUsdOz, priceUsdOz, v=>'$'+formatMoney(v,2), 'gold');
-                updatePrice(goldCnyOz, priceCnyOz, v=>'¥'+formatMoney(v,2));
-                updatePrice(goldUsdGram, priceUsdGram, v=>'$'+formatMoney(v,2));
-                updatePrice(goldCnyGram, priceCnyGram, v=>'¥'+formatMoney(v,2));
+
+            if (metal === 'gold') {
+                updatePrice(goldUsdOz, priceUsdOz, v => '$' + formatMoney(v, 2), 'gold');
+                updatePrice(goldCnyOz, priceCnyOz, v => '¥' + formatMoney(v, 2));
+                updatePrice(goldUsdGram, priceUsdGram, v => '$' + formatMoney(v, 2));
+                updatePrice(goldCnyGram, priceCnyGram, v => '¥' + formatMoney(v, 2));
                 const domGold = priceCnyGram + GOLD_PREMIUM;
-                updatePrice(domesticGoldPrice, domGold, v=>'¥'+formatMoney(v,2), 'domGold');
-            }else{
-                updatePrice(silverUsdOz, priceUsdOz, v=>'$'+formatMoney(v,2), 'silver');
-                updatePrice(silverCnyOz, priceCnyOz, v=>'¥'+formatMoney(v,2));
-                updatePrice(silverUsdGram, priceUsdGram, v=>'$'+formatMoney(v,4));
-                updatePrice(silverCnyGram, priceCnyGram, v=>'¥'+formatMoney(v,4));
+                updatePrice(domesticGoldPrice, domGold, v => '¥' + formatMoney(v, 2), 'domGold');
+            } else {
+                updatePrice(silverUsdOz, priceUsdOz, v => '$' + formatMoney(v, 2), 'silver');
+                updatePrice(silverCnyOz, priceCnyOz, v => '¥' + formatMoney(v, 2));
+                updatePrice(silverUsdGram, priceUsdGram, v => '$' + formatMoney(v, 4));
+                updatePrice(silverCnyGram, priceCnyGram, v => '¥' + formatMoney(v, 4));
                 const domSilver = priceCnyGram + SILVER_PREMIUM;
-                updatePrice(domesticSilverPrice, domSilver, v=>'¥'+formatMoney(v,2), 'domSilver');
+                updatePrice(domesticSilverPrice, domSilver, v => '¥' + formatMoney(v, 2), 'domSilver');
             }
         }
 
-        function setStatus(s, text){
-            const cls = s==='online'?'online':(s==='offline'?'offline':'loading-dot');
-            intlStatusDot.className='status-dot '+cls; intlStatusText.textContent=text;
-            domesticStatusDot.className='status-dot '+cls; domesticStatusText.textContent=text;
-        }
-        function updateCountdown(){
-            const m=Math.floor(countdown/60), s=countdown%60;
-            const str=m>0?`${m}分${s.toString().padStart(2,'0')}秒`:`${s}秒`;
-            intlCountdown.textContent=str; domesticCountdown.textContent=str;
+        function setStatus(status, text) {
+            const cls = status === 'online' ? 'online' : (status === 'offline' ? 'offline' : 'loading-dot');
+            intlStatusDot.className = 'status-dot ' + cls;
+            intlStatusText.textContent = text;
+            domesticStatusDot.className = 'status-dot ' + cls;
+            domesticStatusText.textContent = text;
         }
 
-        async function fetchAllData(manual=false){
-            if(isFetching && !manual) return;
-            isFetching=true; setStatus('loading','获取中...');
+        function updateCountdown() {
+            const m = Math.floor(countdown / 60);
+            const s = countdown % 60;
+            const str = m > 0 ? `${m}分${s.toString().padStart(2, '0')}秒` : `${s}秒`;
+            intlCountdown.textContent = str;
+            domesticCountdown.textContent = str;
+        }
+
+        async function fetchAllData(manual = false) {
+            if (isFetching && !manual) return;
+            isFetching = true;
+            setStatus('loading', '获取中…');
+
             const [rate, goldPrice, silverPrice] = await Promise.all([
                 fetchExchangeRate(),
                 fetchMetalPrice('gold'),
                 fetchMetalPrice('silver')
             ]);
+
             const curRate = rate || exchangeRate || 7.25;
-            if(goldPrice) updateUI('gold', goldPrice, curRate);
-            if(silverPrice) updateUI('silver', silverPrice, curRate);
-            setStatus((goldPrice||silverPrice)?'online':'offline',
-                     (goldPrice||silverPrice)?'已更新':'获取失败');
-            countdown=REFRESH_INTERVAL; updateCountdown();
-            isFetching=false;
+            if (goldPrice) updateUI('gold', goldPrice, curRate);
+            if (silverPrice) updateUI('silver', silverPrice, curRate);
+
+            const success = goldPrice || silverPrice;
+            setStatus(success ? 'online' : 'offline', success ? '已更新' : '获取失败，将自动重试');
+            countdown = REFRESH_INTERVAL;
+            updateCountdown();
+            isFetching = false;
+
+            // 失败时5秒后自动重试一次
+            if (!success && !manual) {
+                setTimeout(() => fetchAllData(false), 5000);
+            }
         }
 
-        setInterval(()=>{ countdown--; updateCountdown(); if(countdown<=0){ fetchAllData(); countdown=REFRESH_INTERVAL; } }, 1000);
+        // 倒计时与定时刷新
+        setInterval(() => {
+            countdown--;
+            updateCountdown();
+            if (countdown <= 0) {
+                fetchAllData(false);
+                countdown = REFRESH_INTERVAL;
+            }
+        }, 1000);
+
+        // 首次加载
         fetchAllData(true);
         window.fetchAllData = fetchAllData;
     })();
